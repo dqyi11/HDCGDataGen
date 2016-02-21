@@ -6,6 +6,7 @@ Created on Feb 19, 2016
 
 from PyQt4 import QtGui, QtCore
 import cv, cv2
+import os.path
 from Obstacle import *
 from World import *
 
@@ -35,6 +36,10 @@ class MapViewer(QtGui.QLabel):
         pix.fill(QtGui.QColor(255,255,255))
         self.setPixmap(pix)
         
+        self.world.fullpath = filename
+        self.world.filename = os.path.basename(filename)
+        self.world.name = os.path.splitext(self.world.filename)[0]
+        
         
     def paintEvent(self, e):
         super(MapViewer, self).paintEvent(e)
@@ -50,6 +55,14 @@ class MapViewer(QtGui.QLabel):
         qp.setPen(QtGui.QPen(QtGui.QColor(125,125,125)))
         for obs in self.world.obstacles:
             qp.drawText(obs.centroid[0], obs.centroid[1], obs.name)
+        
+        qp.setBrush(QtGui.QBrush(QtGui.QColor(255,0,0)))
+        if self.world.start != None:
+            qp.drawRect(self.world.start[0], self.world.start[1],4,4)
+        
+        qp.setBrush(QtGui.QColor(QtGui.QColor(0,0,255)))
+        if self.world.goal != None:
+            qp.drawRect(self.world.goal[0], self.world.goal[1],4,4)
         
         qp.end()
         

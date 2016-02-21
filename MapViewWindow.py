@@ -7,6 +7,7 @@ Created on Feb 19, 2016
 from PyQt4 import QtGui, QtCore
 from MapViewer import *
 from ObstacleEditConfig import *
+from PathPlanningInfo import *
 
 class MapViewWindow(QtGui.QMainWindow):
 
@@ -20,9 +21,23 @@ class MapViewWindow(QtGui.QMainWindow):
         openAction = QtGui.QAction('Open', self)
         openAction.triggered.connect(self.openMap)
         
+        exportAction = QtGui.QAction('Export', self)
+        exportAction.triggered.connect(self.exportXML)
+        
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(openAction)
+        fileMenu.addAction(exportAction)
+        
+        
+        randomAction = QtGui.QAction('&Random', self)
+        randomAction.triggered.connect(self.randomMap)
+        sampleSpatialRelationAction = QtGui.QAction('Random Spatial Relation', self)
+        sampleSpatialRelationAction.triggered.connect(self.sampleSpatialRelation)
+        
+        toolMenu = menubar.addMenu('&Tool')
+        toolMenu.addAction(randomAction)
+        toolMenu.addAction(sampleSpatialRelationAction)
         
         self.view = MapViewer(self)
         self.setCentralWidget(self.view)
@@ -36,13 +51,33 @@ class MapViewWindow(QtGui.QMainWindow):
         fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file')
         if fname != None:
             self.view.openMap( str(fname) )
+            self.setWindowTitle( self.view.world.name )
         
     def mousePressEvent(self, e):
         if e.button() == QtCore.Qt.LeftButton:
             x_pos = e.pos().x()
             y_pos = e.pos().y()
-            for obs in self.view.obstacles:
+            for obs in self.view.world.obstacles:
                 if obs.contains( [x_pos, y_pos] ):
                     print obs.name    
                     self.obsConfig.setObstacle(obs)
                     self.obsConfig.show()
+                
+    def randomMap(self):
+        print "random map"
+        self.view.world.start = self.view.world.samplePoint()
+        self.view.world.goal = self.view.world.samplePoint()
+        self.repaint()
+        
+    def sampleSpatialRelation(self):
+        self.path_plan_info = PathPlanningInfo( self.view.world )
+        self.path_plan_info.randomSpatialRelation()
+        QtGui.QMessageBox.about( self, "Spatial Relation", str( self.path_plan_info.spatial_relations[0] ) )
+        
+    def exportXML(self):
+        
+        fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file')
+        if fname != None:
+            self.path_plan_info.write_to_xml(str(fname))
+                    
+                    

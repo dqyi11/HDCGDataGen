@@ -5,11 +5,27 @@ Created on Feb 19, 2016
 '''
 
 from xml.dom import minidom
+import numpy as np
 
-SPATIAL_RELATIONS = ("IN_BETWEEN", "LEFT_OF", "RIGHT_OF", "TOP_OF", "BOTTOM_OF", "AVOID" )
+SPATIAL_RELATIONS = ("in_between", "left_of", "right_of", "top_of", "bottom_of", "avoid" )
+
+class SpatialRelationInfo(object):
+    
+    def __init__(self):
+        self.type = None
+        self.obstacles = []
+        
+    def __str__(self):
+        string_label =  str(self.type)+"("
+        for i in range(len(self.obstacles)):
+            if i >= len(self.obstacles)-1:
+                string_label += self.obstacles[i].name
+            else:
+                string_label += self.obstacles[i].name + ","
+        string_label += ")"
+        return string_label
 
 class PathPlanningInfo(object):
-
 
     def __init__(self, world):
         self.start = None
@@ -18,19 +34,49 @@ class PathPlanningInfo(object):
         self.world = world
  
         self.segment_length = 5
-        self.mapname = ""
-        self.mappath = ""
+
         self.iteration_num = 5000
         self.costmap_file = None
         
         self.grammar_type = 0
         self.run_type = 2
-        self.min_dist_enabled = 0
+        self.min_dist_enabled = 1
+        
+        self.spatial_relations = []
+        
+        self.path_output_file = self.world.name + "-?"
+        
+    def addCostmapFile(self, costmap_filename):
+        if costmap_filename != None:
+            self.costmap_file = costmap_filename
+            self.min_dist_enabled = 0
+        else:
+            self.costmap_file = costmap_filename
+            self.min_dist_enabled = 1
+        
+    def randomSpatialRelation(self):
+        self.spatial_relations = []
+        sr_info = SpatialRelationInfo()
+        sr_info.type = np.random.choice(SPATIAL_RELATIONS)
+        if sr_info.type == "in_between":
+            obs1 = np.random.choice(self.world.obstacles)
+            obs2 = np.random.choice(self.world.obstacles)
+            while obs1 == obs2:
+                obs2 = np.random.choice(self.world.obstacles)
+            sr_info.obstacles.append(obs1)
+            sr_info.obstacles.append(obs2)
+        else:
+            obs = np.random.choice(self.world.obstacles)
+            sr_info.obstacles.append(obs)
+        self.spatial_relations.append(sr_info)
+            
         
     def write_to_xml(self, filename):
         
         xmldoc = minidom.Document()
         root = xmldoc.createElement("world")
+        root.setAttribute("map_filename", self.world.filename)
+        root.setAttribute("map_fullpath", self.world.fullpath)
         root.setAttribute("map_width", str(self.world.width))
         root.setAttribute("map_height", str(self.world.height))
         root.setAttribute("segment_length", str(self.segment_length))
@@ -38,14 +84,24 @@ class PathPlanningInfo(object):
         root.setAttribute("grammar_type", str(self.grammar_type))
         root.setAttribute("run_type", str(self.run_type))
         root.setAttribute("min_dist_enabled", str(self.min_dist_enabled))
-        root.setAttribute("objective_file",str(self.costmap_file))
+        if self.costmap_file == None:
+            root.setAttribute("objective_file", '')
+        else:
+            root.setAttribute("objective_file", self.costmap_file)
+        root.setAttribute("path_output_file", self.path_output_file)
+        
+        root.setAttribute("start_x", str(self.world.start[0]))
+        root.setAttribute("start_y", str(self.world.start[1]))
+        root.setAttribute("goal_x", str(self.world.goal[0]))
+        root.setAttribute("goal_x", str(self.world.goal[1]))
+        xmldoc.appendChild(root)
         
         obs_info = xmldoc.createElement("obstacles")
         for obs in self.world.obstacles:
             obs_node = xmldoc.createElement("obstacle")
             obs_node.setAttribute("name", obs.name)
-            obs_node.setAttribute("center_x", int(obs.centroid[0]))
-            obs_node.setAttribute("center_y", int(obs.centroid[1]))
+            obs_node.setAttribute("center_x", str(int(obs.centroid[0])))
+            obs_node.setAttribute("center_y", str(int(obs.centroid[1])))
             obs_info.appendChild(obs_node)
         root.appendChild(obs_info)
         
@@ -60,6 +116,7 @@ class PathPlanningInfo(object):
             spatial_rel_nodes.appendChild(spatial_rel_node)
         root.appendChild(spatial_rel_nodes)
         
-        
+        xmldoc.writexml( open(filename, 'w'), indent="  ", addindent="  ", newl="\n" )
+        xmldoc.unlink()   
         
         
