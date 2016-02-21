@@ -7,6 +7,8 @@ Created on Feb 19, 2016
 from PyQt4 import QtGui, QtCore
 from MapViewer import *
 from ObstacleEditConfig import *
+from ParamConfig import *
+from BatchConfig import *
 from PathPlanningInfo import *
 
 class MapViewWindow(QtGui.QMainWindow):
@@ -29,20 +31,26 @@ class MapViewWindow(QtGui.QMainWindow):
         fileMenu.addAction(openAction)
         fileMenu.addAction(exportAction)
         
-        
-        randomAction = QtGui.QAction('&Random', self)
+        configAction = QtGui.QAction('Config', self)
+        configAction.triggered.connect(self.openConfig)
+        randomAction = QtGui.QAction('Random', self)
         randomAction.triggered.connect(self.randomMap)
         sampleSpatialRelationAction = QtGui.QAction('Random Spatial Relation', self)
         sampleSpatialRelationAction.triggered.connect(self.sampleSpatialRelation)
+        batchAction = QtGui.QAction('Batch', self)
+        batchAction.triggered.connect(self.batchGen)
         
         toolMenu = menubar.addMenu('&Tool')
+        toolMenu.addAction(configAction)
         toolMenu.addAction(randomAction)
         toolMenu.addAction(sampleSpatialRelationAction)
+        toolMenu.addAction(batchAction)
         
         self.view = MapViewer(self)
         self.setCentralWidget(self.view)
         
         self.obsConfig = ObstacleEditConfig()
+        self.paramConfig = None
         
         self.show()
         
@@ -52,6 +60,13 @@ class MapViewWindow(QtGui.QMainWindow):
         if fname != None:
             self.view.openMap( str(fname) )
             self.setWindowTitle( self.view.world.name )
+            self.path_plan_info = PathPlanningInfo( self.view.world )
+            self.paramConfig = ParamConfig(self.path_plan_info)
+            
+    def openConfig(self):
+        if self.path_plan_info != None:
+            self.paramConfig.show()
+            
         
     def mousePressEvent(self, e):
         if e.button() == QtCore.Qt.LeftButton:
@@ -69,15 +84,28 @@ class MapViewWindow(QtGui.QMainWindow):
         self.view.world.goal = self.view.world.samplePoint()
         self.repaint()
         
-    def sampleSpatialRelation(self):
-        self.path_plan_info = PathPlanningInfo( self.view.world )
+    def sampleSpatialRelation(self, show_message = True):
         self.path_plan_info.randomSpatialRelation()
-        QtGui.QMessageBox.about( self, "Spatial Relation", str( self.path_plan_info.spatial_relations[0] ) )
+        if show_message == True:
+            QtGui.QMessageBox.about( self, "Spatial Relation", str( self.path_plan_info.spatial_relations[0] ) )
         
     def exportXML(self):
         
         fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file')
         if fname != None:
             self.path_plan_info.write_to_xml(str(fname))
+            
+    def batchGen(self):
+        batch_info = BatchInfo()
+        batch_config = BatchConfig(batch_info)
+        batch_config.exec_()
+        
+        for i in range(batch_info.batch_num):
+            self.randomMap()
+            self.sampleSpatialRelation(False)
+            fname = self.path_plan_info.world.name + "-config-" + str(i) + ".xml"
+            self.path_plan_info.write_to_xml(fname)
+        
+        return
                     
                     

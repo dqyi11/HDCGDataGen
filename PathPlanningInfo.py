@@ -36,7 +36,7 @@ class PathPlanningInfo(object):
         self.segment_length = 5
 
         self.iteration_num = 5000
-        self.costmap_file = None
+        self.costmap_file = ""
         
         self.grammar_type = 0
         self.run_type = 2
@@ -87,7 +87,7 @@ class PathPlanningInfo(object):
         world_node.setAttribute("grammar_type", str(self.grammar_type))
         world_node.setAttribute("run_type", str(self.run_type))
         world_node.setAttribute("min_dist_enabled", str(self.min_dist_enabled))
-        if self.costmap_file == None:
+        if self.costmap_file == "":
             world_node.setAttribute("objective_file", '')
         else:
             world_node.setAttribute("objective_file", self.costmap_file)
