@@ -44,7 +44,7 @@ class PathPlanningInfo(object):
         
         self.spatial_relations = []
         
-        self.path_output_file = self.world.name + "-?"
+        self.path_output_file = self.world.name
         
     def addCostmapFile(self, costmap_filename):
         if costmap_filename != None:
@@ -74,27 +74,30 @@ class PathPlanningInfo(object):
     def write_to_xml(self, filename):
         
         xmldoc = minidom.Document()
-        root = xmldoc.createElement("world")
-        root.setAttribute("map_filename", self.world.filename)
-        root.setAttribute("map_fullpath", self.world.fullpath)
-        root.setAttribute("map_width", str(self.world.width))
-        root.setAttribute("map_height", str(self.world.height))
-        root.setAttribute("segment_length", str(self.segment_length))
-        root.setAttribute("max_iteration_num", str(self.iteration_num))
-        root.setAttribute("grammar_type", str(self.grammar_type))
-        root.setAttribute("run_type", str(self.run_type))
-        root.setAttribute("min_dist_enabled", str(self.min_dist_enabled))
-        if self.costmap_file == None:
-            root.setAttribute("objective_file", '')
-        else:
-            root.setAttribute("objective_file", self.costmap_file)
-        root.setAttribute("path_output_file", self.path_output_file)
-        
-        root.setAttribute("start_x", str(self.world.start[0]))
-        root.setAttribute("start_y", str(self.world.start[1]))
-        root.setAttribute("goal_x", str(self.world.goal[0]))
-        root.setAttribute("goal_x", str(self.world.goal[1]))
+        root = xmldoc.createElement("root")
         xmldoc.appendChild(root)
+        
+        world_node = xmldoc.createElement("world")
+        world_node.setAttribute("map_filename", self.world.filename)
+        world_node.setAttribute("map_fullpath", self.world.fullpath)
+        world_node.setAttribute("map_width", str(self.world.width))
+        world_node.setAttribute("map_height", str(self.world.height))
+        world_node.setAttribute("segment_length", str(self.segment_length))
+        world_node.setAttribute("max_iteration_num", str(self.iteration_num))
+        world_node.setAttribute("grammar_type", str(self.grammar_type))
+        world_node.setAttribute("run_type", str(self.run_type))
+        world_node.setAttribute("min_dist_enabled", str(self.min_dist_enabled))
+        if self.costmap_file == None:
+            world_node.setAttribute("objective_file", '')
+        else:
+            world_node.setAttribute("objective_file", self.costmap_file)
+        world_node.setAttribute("path_output_file", self.path_output_file)
+        
+        world_node.setAttribute("start_x", str(self.world.start[0]))
+        world_node.setAttribute("start_y", str(self.world.start[1]))
+        world_node.setAttribute("goal_x", str(self.world.goal[0]))
+        world_node.setAttribute("goal_y", str(self.world.goal[1]))
+        root.appendChild(world_node)
         
         obs_info = xmldoc.createElement("obstacles")
         for obs in self.world.obstacles:
@@ -103,7 +106,7 @@ class PathPlanningInfo(object):
             obs_node.setAttribute("center_x", str(int(obs.centroid[0])))
             obs_node.setAttribute("center_y", str(int(obs.centroid[1])))
             obs_info.appendChild(obs_node)
-        root.appendChild(obs_info)
+        world_node.appendChild(obs_info)
         
         spatial_rel_nodes = xmldoc.createElement("spatial_relations")
         for spatial_rel in self.spatial_relations:
@@ -114,9 +117,9 @@ class PathPlanningInfo(object):
                 spatial_rel_obs_node.setAttribute("name", spatial_rel_obs.name)
                 spatial_rel_node.appendChild(spatial_rel_obs_node)
             spatial_rel_nodes.appendChild(spatial_rel_node)
-        root.appendChild(spatial_rel_nodes)
+        world_node.appendChild(spatial_rel_nodes)
         
-        xmldoc.writexml( open(filename, 'w'), indent="  ", addindent="  ", newl="\n" )
+        xmldoc.writexml( open(filename, 'w'), indent="  ", addindent="  ", newl="\n", encoding='utf-8' )
         xmldoc.unlink()   
         
         
