@@ -10,6 +10,7 @@ from ObstacleEditConfig import *
 from ParamConfig import *
 from BatchConfig import *
 from PathPlanningInfo import *
+import os
 
 class MapViewWindow(QtGui.QMainWindow):
 
@@ -103,8 +104,12 @@ class MapViewWindow(QtGui.QMainWindow):
         for i in range(batch_info.batch_num):
             self.randomMap()
             self.sampleSpatialRelation(False)
-            fname = self.path_plan_info.world.name + "-config-" + str(i) + ".xml"
+            self.path_plan_info.path_output_file = self.path_plan_info.world.name + "-" + str(i)
+            fname = batch_info.workspace + "/" + self.path_plan_info.path_output_file + ".xml"
             self.path_plan_info.write_to_xml(fname)
+            
+            cmd = batch_info.workspace + "/h2p-harrts-demo"
+            os.system(cmd + " " + fname)
         
         return
                     
