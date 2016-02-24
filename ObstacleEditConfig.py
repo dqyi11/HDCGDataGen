@@ -27,6 +27,10 @@ class ObstacleEditConfig(QtGui.QWidget):
         self.btnCancel = QtGui.QPushButton("Cancel")
         self.btnCancel.clicked.connect(self.cancel)
         
+        self.okShortcut = QtGui.QShortcut(self)
+        self.okShortcut.setKey(QtCore.Qt.Key_Enter)
+        self.okShortcut.activated.connect(self.ok)
+        
         self.grid = QtGui.QGridLayout()
         self.grid.setSpacing(10)
         self.grid.addWidget(self.obstacleNameLabel, 0, 0)

@@ -85,9 +85,9 @@ class MapViewWindow(QtGui.QMainWindow):
         self.view.world.goal = self.view.world.samplePoint()
         self.repaint()
         
-    def sampleSpatialRelation(self, show_message = True):
+    def sampleSpatialRelation(self, hide_message = False):
         self.path_plan_info.randomSpatialRelation()
-        if show_message == True:
+        if hide_message == False:
             QtGui.QMessageBox.about( self, "Spatial Relation", str( self.path_plan_info.spatial_relations[0] ) )
         
     def exportXML(self):
@@ -103,7 +103,7 @@ class MapViewWindow(QtGui.QMainWindow):
         
         for i in range(batch_info.batch_num):
             self.randomMap()
-            self.sampleSpatialRelation(False)
+            self.sampleSpatialRelation(True)
             self.path_plan_info.path_output_file = self.path_plan_info.world.name + "-" + str(i)
             fname = batch_info.workspace + "/" + self.path_plan_info.path_output_file + ".xml"
             self.path_plan_info.write_to_xml(fname)

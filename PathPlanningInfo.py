@@ -113,7 +113,7 @@ class PathPlanningInfo(object):
             spatial_rel_node = xmldoc.createElement("spatial_relation")
             spatial_rel_node.setAttribute("type", spatial_rel.type)
             for spatial_rel_obs in spatial_rel.obstacles:
-                spatial_rel_obs_node = xmldoc.createElement("obs")
+                spatial_rel_obs_node = xmldoc.createElement("obstacle")
                 spatial_rel_obs_node.setAttribute("name", spatial_rel_obs.name)
                 spatial_rel_node.appendChild(spatial_rel_obs_node)
             spatial_rel_nodes.appendChild(spatial_rel_node)
