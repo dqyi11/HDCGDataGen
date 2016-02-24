@@ -7,11 +7,11 @@ Created on Feb 19, 2016
 from PyQt4 import QtGui, QtCore
 from Obstacle import *
 
-class ObstacleEditConfig(QtGui.QWidget):
+class ObstacleEditConfig(QtGui.QDialog):
 
 
     def __init__(self):
-        super(QtGui.QWidget, self).__init__()
+        super(QtGui.QDialog, self).__init__()
         self.obstacle = None
         self.initUI()
         self.hide()

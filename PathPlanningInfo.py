@@ -47,7 +47,7 @@ class PathPlanningInfo(object):
         self.path_output_file = self.world.name
         
     def addCostmapFile(self, costmap_filename):
-        if costmap_filename != None:
+        if costmap_filename == "":
             self.costmap_file = costmap_filename
             self.min_dist_enabled = 0
         else:

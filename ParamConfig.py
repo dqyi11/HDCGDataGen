@@ -5,11 +5,11 @@ Created on Feb 21, 2016
 '''
 from PyQt4 import QtGui, QtCore
 
-class ParamConfig(QtGui.QWidget):
+class ParamConfig(QtGui.QDialog):
 
 
     def __init__(self, path_plan_info):
-        super(QtGui.QWidget, self).__init__()
+        super(QtGui.QDialog, self).__init__()
         self.path_plan_info = path_plan_info
         self.initUI()
         self.hide()

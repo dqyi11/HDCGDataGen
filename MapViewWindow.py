@@ -104,8 +104,8 @@ class MapViewWindow(QtGui.QMainWindow):
         for i in range(batch_info.batch_num):
             self.randomMap()
             self.sampleSpatialRelation(True)
-            self.path_plan_info.path_output_file = self.path_plan_info.world.name + "-" + str(i)
-            fname = batch_info.workspace + "/" + self.path_plan_info.path_output_file + ".xml"
+            self.path_plan_info.path_output_file = batch_info.workspace + "/" + self.path_plan_info.world.name + "-" + str(i)
+            fname = self.path_plan_info.path_output_file + ".xml"
             self.path_plan_info.write_to_xml(fname)
             
             cmd = batch_info.workspace + "/h2p-harrts-demo"
