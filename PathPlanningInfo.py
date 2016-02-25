@@ -14,6 +14,7 @@ class SpatialRelationInfo(object):
     def __init__(self):
         self.type = None
         self.obstacles = []
+        self.child_info = None
         
     def __str__(self):
         string_label =  str(self.type)+"("
@@ -53,9 +54,14 @@ class PathPlanningInfo(object):
         else:
             self.costmap_file = costmap_filename
             self.min_dist_enabled = 1
+            
+    def updateRandomSpatialRelation(self):
+        self.spatial_relations = []
+        sr_info = self.randomSpatialRelation()
+        self.spatial_relations.append(sr_info)
         
     def randomSpatialRelation(self):
-        self.spatial_relations = []
+        
         sr_info = SpatialRelationInfo()
         sr_info.type = np.random.choice(SPATIAL_RELATIONS)
         if sr_info.type == "in_between":
@@ -65,10 +71,12 @@ class PathPlanningInfo(object):
                 obs2 = np.random.choice(self.world.obstacles)
             sr_info.obstacles.append(obs1)
             sr_info.obstacles.append(obs2)
+        elif sr_info.type == "avoid":
+            sr_info.child_info = self.randomSpatialRelation() 
         else:
             obs = np.random.choice(self.world.obstacles)
             sr_info.obstacles.append(obs)
-        self.spatial_relations.append(sr_info)
+        return sr_info
             
         
     def write_to_xml(self, filename):
@@ -110,16 +118,22 @@ class PathPlanningInfo(object):
         
         spatial_rel_nodes = xmldoc.createElement("spatial_relations")
         for spatial_rel in self.spatial_relations:
-            spatial_rel_node = xmldoc.createElement("spatial_relation")
-            spatial_rel_node.setAttribute("type", spatial_rel.type)
-            for spatial_rel_obs in spatial_rel.obstacles:
-                spatial_rel_obs_node = xmldoc.createElement("obstacle")
-                spatial_rel_obs_node.setAttribute("name", spatial_rel_obs.name)
-                spatial_rel_node.appendChild(spatial_rel_obs_node)
-            spatial_rel_nodes.appendChild(spatial_rel_node)
+            self.save_spatial_rel_info(xmldoc, spatial_rel_nodes, spatial_rel)
         world_node.appendChild(spatial_rel_nodes)
         
         xmldoc.writexml( open(filename, 'w'), indent="  ", addindent="  ", newl="\n", encoding='utf-8' )
         xmldoc.unlink()   
+        
+    def save_spatial_rel_info(self, xmldoc, node, spatial_rel):
+        spatial_rel_node = xmldoc.createElement("spatial_relation")
+        spatial_rel_node.setAttribute("type", spatial_rel.type)
+        for spatial_rel_obs in spatial_rel.obstacles:
+            spatial_rel_obs_node = xmldoc.createElement("obstacle")
+            spatial_rel_obs_node.setAttribute("name", spatial_rel_obs.name)
+            spatial_rel_node.appendChild(spatial_rel_obs_node)
+        if spatial_rel.child_info != None:
+            self.save_spatial_rel_info(xmldoc, spatial_rel_node, spatial_rel.child_info)
+        node.appendChild(spatial_rel_node)
+
         
         

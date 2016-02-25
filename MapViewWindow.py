@@ -86,7 +86,7 @@ class MapViewWindow(QtGui.QMainWindow):
         self.repaint()
         
     def sampleSpatialRelation(self, hide_message = False):
-        self.path_plan_info.randomSpatialRelation()
+        self.path_plan_info.updateRandomSpatialRelation()
         if hide_message == False:
             QtGui.QMessageBox.about( self, "Spatial Relation", str( self.path_plan_info.spatial_relations[0] ) )
         
